@@ -1,0 +1,60 @@
+- hosts: "{{ server.ip }}"
+  user: "{{ server.exec_ansible_username }}"
+  become: yes
+  tasks:
+    - name: Apt update
+      apt:
+        update_cache: yes
+    - name: Install OpenJDK
+      apt:
+        name:
+          - openjdk-{{ server.openjdk_version }}-jdk
+          - zip
+          - unzip
+    - name: Make user 
+      user:
+        name: minecraft
+    - name: Create server dir
+      file:
+        path: /home/{{ server.exec_minecraft_username }}/servers/{{ server.dirname }}
+        state: directory
+        recurse: yes
+        owner: "{{ server.exec_minecraft_username }}"
+        group: "{{ server.exec_minecraft_username }}"
+        mode: 0703
+    - name: Download and unzip modpack file
+      unarchive:
+        src: "{{ server.download_modpack_url }}"
+        dest: /home/{{ server.exec_minecraft_username }}/servers/{{ server.dirname }}
+        owner: "{{ server.exec_minecraft_username }}"
+        group: "{{ server.exec_minecraft_username }}"
+        mode: 0703
+        remote_src: yes
+    - name: Install forge.jar
+      command: 
+        cmd: java -jar forge-{{ server.forge_version }}-installer.jar --installServer
+        chdir: /home/{{ server.exec_minecraft_username }}/servers/{{ server.dirname }}
+    - name: Signature eula.txt
+      copy:
+        dest: /home/{{ server.exec_minecraft_username }}/servers/{{ server.dirname }}/eula.txt
+        content: eula=true
+        owner: "{{ server.exec_minecraft_username }}"
+        group: "{{ server.exec_minecraft_username }}"
+        mode: 0703
+    - name: Make and copy server.properties
+      template:
+        src: ./server.properties.j2
+        dest: /home/{{ server.exec_minecraft_username }}/servers/{{ server.dirname }}
+        owner: "{{ server.exec_minecraft_username }}"
+        group: "{{ server.exec_minecraft_username }}"
+        mode: 0703
+    - name: Make and copy runserver.service
+      template:
+        src: ./runserver.service.j2
+        dest: /etc/systemd/system/{{ server.dirname }}.service
+    - name: Enable runserver.service
+      systemd:
+        name: "{{ server.dirname }}.service"
+        state: restarted
+        enabled: yes
+
