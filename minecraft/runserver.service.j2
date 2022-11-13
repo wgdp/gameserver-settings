@@ -1,0 +1,14 @@
+[Unit]
+Description={{ service.description }}
+After=network.target
+
+[Service]
+WorkingDirectory=/home/{{ server.exec_minecraft_username }}/servers/{{ server.dirname }}
+ExecStart=/bin/bash /home/{{ server.exec_minecraft_username }}/servers/{{ server.dirname }}/{{ server.runserver_sh }}
+Restart=always
+User={{ server.exec_minecraft_username }}
+Group={{ server.exec_minecraft_username }}
+
+[Install]
+WantedBy=multi-user.target
+
