@@ -44,7 +44,7 @@
     - name: Make and copy server.properties
       template:
         src: ./server.properties.j2
-        dest: /home/{{ server.exec_minecraft_username }}/servers/{{ server.dirname }}
+        dest: /home/{{ server.exec_minecraft_username }}/servers/{{ server.dirname }}/server.properties
         owner: "{{ server.exec_minecraft_username }}"
         group: "{{ server.exec_minecraft_username }}"
         mode: 0703
