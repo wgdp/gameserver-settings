@@ -1,5 +1,21 @@
 # 使い方
 
+[Ansible](https://www.ansible.com/)をインストールしておく。
+
+```bash
+# Ubuntu
+sudo apt update -y
+sudo apt install -y software-properties-common
+sudo apt apt-add-repository --yes --update ppa:ansible/ansible
+sudo apt install -y ansible
+
+# mac
+brew install ansible
+
+# pip
+pip insatll --user ansible
+```
+
 hostsとvars.yml（もしくはsecret.yml）をサーバーごとに用意し実行する。
 
 ```bash
