@@ -22,12 +22,29 @@
         owner: "{{ server.exec_minecraft_username }}"
         group: "{{ server.exec_minecraft_username }}"
         mode: 0703
-    - name: Download and unzip modpack file
+    - name: Create temp dir
+      file:
+        path: /tmp/{{ server.dirname }}
+        state: directory
+        recurse: yes
+        owner: "{{ server.exec_minecraft_username }}"
+        group: "{{ server.exec_minecraft_username }}"
+        mode: 0703
+    - name: Download and unzip modpack file to temp dir
       unarchive:
         src: "{{ server.download_modpack_url }}"
+        dest: /tmp/{{ server.dirname }}
+        owner: "{{ server.exec_minecraft_username }}"
+        group: "{{ server.exec_minecraft_username }}"
+        mode: 0703
+        remote_src: yes
+    - name: Remove nest dir and copy
+      copy:
+        src: /tmp/{{ server.dirname }}/{{ server.unzipfile_nest_path }}
         dest: /home/{{ server.exec_minecraft_username }}/servers/{{ server.dirname }}
         owner: "{{ server.exec_minecraft_username }}"
         group: "{{ server.exec_minecraft_username }}"
+        directory_mode: true
         mode: 0703
         remote_src: yes
     - name: Install forge.jar

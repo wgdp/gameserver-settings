@@ -22,17 +22,31 @@
         owner: "{{ server.exec_minecraft_username }}"
         group: "{{ server.exec_minecraft_username }}"
         mode: 0703
-    - name: Download server.jar
-      get_url:
-        url: "{{ server.minecraft_serverjar_download_url }}"
-        dest: /home/{{ server.exec_minecraft_username }}/servers/{{ server.dirname }}
+    - name: Create temp dir
+      file:
+        path: /tmp/{{ server.dirname }}
+        state: directory
+        recurse: yes
         owner: "{{ server.exec_minecraft_username }}"
         group: "{{ server.exec_minecraft_username }}"
         mode: 0703
-    - name: Create run script
-      ansible.builtin.shell: 
-        cmd: 'echo "java -Xmx{{ server.jvm_max_memory }}M -Xms{{ server.jvm_min_memory }}M -jar server.jar nogui" > {{ server.runserver_sh }}'
-        chdir: /home/{{ server.exec_minecraft_username }}/servers/{{ server.dirname }}
+    - name: Download and unzip modpack file to temp dir
+      unarchive:
+        src: "{{ server.download_modpack_url }}"
+        dest: /tmp/{{ server.dirname }}
+        owner: "{{ server.exec_minecraft_username }}"
+        group: "{{ server.exec_minecraft_username }}"
+        mode: 0703
+        remote_src: yes
+    - name: Remove nest dir and copy
+      copy:
+        src: /tmp/{{ server.dirname }}/{{ server.unzipfile_nest_path }}/
+        dest: /home/{{ server.exec_minecraft_username }}/servers/{{ server.dirname }}
+        owner: "{{ server.exec_minecraft_username }}"
+        group: "{{ server.exec_minecraft_username }}"
+        directory_mode: true
+        mode: 0703
+        remote_src: yes
     - name: Signature eula.txt
       copy:
         dest: /home/{{ server.exec_minecraft_username }}/servers/{{ server.dirname }}/eula.txt
@@ -56,3 +70,4 @@
         name: "{{ server.dirname }}.service"
         state: restarted
         enabled: yes
+
